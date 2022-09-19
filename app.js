@@ -4,6 +4,7 @@ const SQUARE_SIZE = 85
 const SQUARE_ROWS = 8
 const SQUARE_COLS = 8
 const SQUARE_INIT = 1
+const PIECES = 3 // knight, bishop, rook
 const WHITE = '#e7e6e6'
 const BLACK = '#7196b2'
 const YELLOW = '#d9a95e'
@@ -13,8 +14,125 @@ const infos = document.getElementById('game-info')
 const ctx = canvas.getContext('2d')
 
 let tiles = []
+let moveList = []
 let points = 0
 let best = JSON.parse(localStorage.getItem('best-pts') ?? '{"points":0}')
+
+const rookMove = (from) => {
+    moveList = []
+    for (let j = 0; j < SQUARE_COLS; j++){
+        let move = {
+           x: from.x,
+           y: j
+        }
+        moveList.push(move)
+        move = {
+           x: j,
+           y: from.y
+        }
+        moveList.push(move)
+        }
+    moveList.splice(moveList.findIndex(t => t.x === from.x && t.y === from.y), 1)
+    moveList.splice(moveList.findIndex(t => t.x === from.x && t.y === from.y), 1)
+    return moveList
+}
+
+const bishMove = (from) => {
+    moveList = []
+    for (let j = 1; j < SQUARE_COLS; j++){
+        if (from.x + j < SQUARE_COLS && from.y + j < SQUARE_ROWS){
+            let move = {
+                x: from.x + j,
+                y: from.y + j
+            
+            }
+            moveList.push(move)
+        }
+        if (from.x - j >= 0 && from.y - j >= 0){
+            let move = {
+                x: from.x - j,
+                y: from.y - j
+            
+            }
+            moveList.push(move)
+        }
+        if (from.x + j < SQUARE_COLS && from.y - j >= 0){
+            let move = {
+                x: from.x + j,
+                y: from.y - j
+            
+            }
+            moveList.push(move)
+        }
+        if (from.x - j >= 0 && from.y + j < SQUARE_ROWS){
+            let move = {
+                x: from.x - j,
+                y: from.y + j
+            
+            }
+            moveList.push(move)
+        }
+    }
+    return moveList
+}
+
+const knightMove = (from) => {
+    moveList = []
+    for (let i = 1; i <= 2; i++){
+        for (let j = 1; j <= 2; j++){
+            if (i == j){
+                continue
+            }
+            if (from.x + i < SQUARE_COLS && from.y + j < SQUARE_ROWS){
+                let move = {
+                    x: from.x + i,
+                    y: from.y + j
+                
+                }
+                moveList.push(move)
+            }
+            if (from.x - i >= 0 && from.y - j >= 0){
+                let move = {
+                    x: from.x - i,
+                    y: from.y - j
+                
+                }
+                moveList.push(move)
+            }
+            if (from.x + i < SQUARE_COLS && from.y - j >= 0){
+                let move = {
+                    x: from.x + i,
+                    y: from.y - j
+                
+                }
+                moveList.push(move)
+            }
+            if (from.x - i >= 0 && from.y + j < SQUARE_ROWS){
+                let move = {
+                    x: from.x - i,
+                    y: from.y + j
+                
+                }
+                moveList.push(move)
+            }
+                    
+        }
+    }
+    return moveList
+}
+
+const queenMove = (from) => {
+    moveList = []
+    let rookMoves = rookMove(from)
+    let bishMoves = bishMove(from)
+    moveList = moveList.concat(rookMoves)
+    moveList.concat(bishMoves)
+
+    return moveList
+}
+
+
+
 
 const resetSession = () => {
     if (points === best.points) {
@@ -26,8 +144,8 @@ const resetSession = () => {
 }
 const handleClick = event => {
     const tile = {
-        x: Math.floor((event.clientX - canvas.offsetLeft) / SQUARE_SIZE),
-        y: Math.floor((event.clientY - canvas.offsetTop) / SQUARE_SIZE)
+        x: Math.floor((event.clientX - canvas.offsetLeft + window.scrollX) / SQUARE_SIZE),
+        y: Math.floor((event.clientY - canvas.offsetTop + window.scrollY) / SQUARE_SIZE)
     }
 
     const here = getTileHere(tile)
@@ -41,14 +159,13 @@ const handleClick = event => {
 
 const handleRelease = event => {
     const tile = {
-        x: Math.floor((event.clientX - canvas.offsetLeft) / SQUARE_SIZE),
-        y: Math.floor((event.clientY - canvas.offsetTop) / SQUARE_SIZE)
+        x: Math.floor((event.clientX - canvas.offsetLeft + window.scrollX) / SQUARE_SIZE),
+        y: Math.floor((event.clientY - canvas.offsetTop + window.scrollY) / SQUARE_SIZE)
     }
 
     const here = getTileHere(tile)
     if (here !== undefined && getTileColor(here) == RED && tiles.length == 1) {
-        newTile(RED)
-        newTile(YELLOW)
+        newTile()
 
         removeTileHere(here)
         points++
@@ -62,18 +179,35 @@ const handleRelease = event => {
     }
     
 }
-
-const newTile = (new_color) => {
+const newTile = () => {
     let tile = {}
-    do {
-        tile = {
-            x: Math.floor(Math.random() * SQUARE_COLS),
-            y: Math.floor(Math.random() * SQUARE_ROWS),
-            color: new_color 
-        }
-    } while (getTileHere(tile) !== undefined)
+    tile = {
+        x: Math.floor(Math.random() * SQUARE_COLS),
+        y: Math.floor(Math.random() * SQUARE_ROWS),
+        color: YELLOW
+    }
+    let piece = Math.floor(Math.random() * PIECES)
+    switch (piece){
+        case 0:
+            moveList = knightMove(tile)
+            console.log("Knight move")
+            break
+        case 1:
+            moveList = bishMove(tile)
+            console.log("Bishop move")
+            break
+        case 2:
+            moveList = rookMove(tile)
+            console.log("Rook move")
+            break
+    }
+    let index = Math.floor(Math.random() * moveList.length)
     tiles.push(tile)
+    let destination = moveList[index]
+    destination.color = RED
+    tiles.push(destination)
 }
+
 
 const getTileHere = ({x, y}) => tiles.find(t => t.x === x && t.y === y)
 const getTileColor = (tile) => tile.color
@@ -87,7 +221,6 @@ const resetBoard = () => {
             } else {
                 ctx.fillStyle = WHITE 
             }
-
             ctx.fillRect(j * SQUARE_SIZE, i * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
         }
     }
@@ -103,8 +236,7 @@ const initBoard = () => {
     canvas.style.pointerEvents = "auto"
     tiles = []
     for (let i = 0; i < SQUARE_INIT; i++) {
-        newTile(YELLOW)
-        newTile(RED)
+        newTile()
     }
     for (let i = 0; i < SQUARE_ROWS; i++) {
         for (let j = 0; j < SQUARE_COLS; j++) {
@@ -149,7 +281,7 @@ window.onload = () => {
     startPage()
 
     document.addEventListener('keydown', initBoard)
-    canvas.addEventListener('mousedown', handleClick)
-    canvas.addEventListener('mouseup', handleRelease)
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('mouseup', handleRelease)
 
 }
