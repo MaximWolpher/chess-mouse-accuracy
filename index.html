@@ -7,11 +7,37 @@
     <title>Chess Mouse Accuracy</title>
 </head>
 <body>
-    <div class="stats">
-        <p id="game-info"></p>
+    <div class="header">
+        <p id="header-info"></p>
     </div>
-    <div>
-        <canvas id="game" width="680" height="680"></canvas>
+    <div id="main-wrap">
+		<main class="lobby">
+
+        <div class=container-left>
+            <div class="game-options">
+                <label class="form-control">
+                    <input type="checkbox" id="knight-option" name="knight-option" value=true>
+                    Knight moves
+                </label>
+                <label class="form-control">
+                <input type="checkbox" id="bishop-option" name="bishop-option" value=true>
+                    Bishop moves
+                </label>
+                <label class="form-control">
+                <input type="checkbox" id="rook-option" name="rook-option" value=true>
+                    Rook moves
+                </label>
+            </div>
+		</div>
+
+            <div class="board">
+                <canvas class "chess" id="game" width="680" height="680"></canvas>
+            </div>
+            <div class="container-right">
+                <p id="game-stats" class="game-stats"></p>
+            </div>
+        </div>
+		</main>
     </div>
     <script src="./app.js" type="text/javascript"></script>
 </body>

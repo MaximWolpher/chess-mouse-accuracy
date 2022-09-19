@@ -10,7 +10,8 @@ const BLACK = '#7196b2'
 const YELLOW = '#d9a95e'
 const RED = '#ed6767'
 const canvas = document.getElementById('game')
-const infos = document.getElementById('game-info')
+const headerInfo = document.getElementById('header-info')
+const gameStats = document.getElementById('game-stats')
 const ctx = canvas.getContext('2d')
 
 let tiles = []
@@ -262,14 +263,21 @@ const update = () => {
     } else {
         textInfo += `Best Score: ${best.points}`
     }
-    infos.innerHTML = textInfo
+    gameStats.innerHTML = textInfo
     resetBoard()
     requestAnimationFrame(update)
 }
 
 const startPage = () => {
-    const startText= `Press any key to start`
-    infos.innerHTML = startText 
+    const startText= `Chess Mouse Accuracy Trainer`
+    headerInfo.innerHTML = startText 
+    let textInfo = `Score: ${points}<br>`
+    if (points === best.points) {
+        textInfo += `Best Score:${best.points}`
+    } else {
+        textInfo += `Best Score: ${best.points}`
+    }
+    gameStats.innerHTML = textInfo
 
     ctx.clearRect(0, 0, canvas.width, canvas.height) 
     requestAnimationFrame(startPage)
@@ -281,7 +289,7 @@ window.onload = () => {
     startPage()
 
     document.addEventListener('keydown', initBoard)
-    document.addEventListener('mousedown', handleClick)
-    document.addEventListener('mouseup', handleRelease)
+    canvas.addEventListener('mousedown', handleClick)
+    canvas.addEventListener('mouseup', handleRelease)
 
 }

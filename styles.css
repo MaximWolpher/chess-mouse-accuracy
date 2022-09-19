@@ -1,16 +1,171 @@
+:root {
+  --form-control-color: #d9a95e;
+  --form-control-disabled: #959495;
+  --main-margin: 1vw;
+  --borderRadius: 8px;
+  --surfaceColor: #333538; 
+  --surfaceColorHover: #404246;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
 body {
     background-color: #0a0a0a;
 }
-
-canvas{ 
-    display: block; 
-    margin: 10px auto;  
-    border-radius: 5px;
-    pointer-events: none;
-}  
-.stats{
+.header{
     text-align: center;
-    font-family: "Monaco", "Lucida Console", monospace;
-    font-size: 20px;
+    font-family: 'Red Hat Display', sans-serif !important;
+    font-size: 25px;
+    white-space: nowrap;
+    line-height: 37px;
     color: #99d9ea 
+}
+.container-left{
+	grid-area: options;
+	min-height: 400px;
+	max-height: calc(100vh - calc(var(--site-header-height) + var(--site-header-margin)) - 2vmin);
+	width: 100% !important;
+	height: calc(100% - 40px) !important;
+	max-height: auto !important;
+	border: 2px solid var(--surfaceColorHover) !important;
+	border-radius: var(--borderRadius) !important;
+	overflow: hidden !important;
+	margin-top: 20px !important;
+	background: var(--surfaceColor) !important;
+	backdrop-filter: blur(16px) !important;
+	display: flex;
+	flex-flow: column;
+}
+.container-right{
+	overflow: auto !important;
+	width: 100% !important;
+	height: calc(100% - 40px) !important;
+	max-height: auto !important;
+	border: 2px solid var(--surfaceColorHover) !important;
+	border-radius: var(--borderRadius) !important;
+	overflow: hidden !important;
+	margin-top: 20px !important;
+	background: var(--surfaceColor) !important;
+	backdrop-filter: blur(16px) !important;
+	grid-area: score;
+	display: flex;
+	flex-flow: column;
+}
+
+.game-stats{
+	text-align: center;
+    font-family: 'Red Hat Display', sans-serif !important;
+    font-size: 25px;
+    color: #99d9ea;
+	padding: 1em;
+}
+.game-options{
+    font-family: 'Red Hat Display', sans-serif !important;
+    font-size: 25px;
+    color: #99d9ea;
+	flex: 1 1 100%;
+	position: relative;
+	display: grid;
+	padding: 1em;
+}
+.board{
+	grid-area: board;
+}
+
+.chess{
+	overflow: visible;
+	display: block;
+	position: relative;
+	height: 0;
+	padding-bottom: 100%;
+	width: 100%;
+	white-space: nowrap;
+}
+.lobby{
+	grid-template-rows: repeat(2, fit-content(0));
+	grid-area: main;
+	display: grid;
+	grid-gap: 1vmin;
+}
+main.lobby{
+	grid-template-areas: 'options board board score' !important;
+	grid-template-columns: minmax(400px, 1fr) 1fr 1fr minmax(400px, 1fr) !important;
+}
+main{
+	width: 100% !important;
+}
+#main-wrap {
+  justify-items: center !important;
+  display: grid;
+  grid-template-areas: '. . main . .';
+  --main-max-width: 1500px;
+  grid-template-columns: var(--main-margin) 1fr minmax(auto, var(--main-max-width)) 1fr var(--main-margin);
+  margin-top: var(--site-header-margin);
+}
+canvas{ 
+    pointer-events: none;
+  	border-radius: 5px;
+}  
+.form-control {
+  line-height: 1.1;
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+}
+
+.form-control + .form-control {
+  margin-top: 1em;
+}
+
+.form-control--disabled {
+  color: var(--form-control-disabled);
+  cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+  /* Add if not using autoprefixer */
+  -webkit-appearance: none;
+  /* Remove most all native input styles */
+  appearance: none;
+  /* For iOS < 15 */
+  background-color: var(--form-background);
+  /* Not removed via appearance */
+  margin: 0;
+
+  font: inherit;
+  color: currentColor;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.10em solid currentColor;
+  border-radius: 0.15em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transform-origin: center;
+  transition: 50ms transform ease-in-out;
+  box-shadow: inset 1em 1em var(--form-control-color);
+  /* Windows High Contrast Mode */
+  background-color: CanvasText;
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:disabled {
+  --form-control-color: var(--form-control-disabled);
+
+  color: var(--form-control-disabled);
+  cursor: not-allowed;
 }
