@@ -109,63 +109,34 @@ canvas{
     pointer-events: none;
   	border-radius: 5px;
 }  
-.form-control {
-  line-height: 1.1;
-  display: grid;
-  grid-template-columns: 1em auto;
-  gap: 0.5em;
+.piece{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  border: 3px solid #99d9ea;
+  border-radius: 5px;
+  box-sizing: border-box;
+  margin: 1em;
 }
 
-.form-control + .form-control {
-  margin-top: 1em;
+svg{
+	transform: scale(2, 2);
 }
 
-.form-control--disabled {
-  color: var(--form-control-disabled);
-  cursor: not-allowed;
+
+input {
+    display: none;
 }
 
-input[type="checkbox"] {
-  /* Add if not using autoprefixer */
-  -webkit-appearance: none;
-  /* Remove most all native input styles */
-  appearance: none;
-  /* For iOS < 15 */
-  background-color: var(--form-background);
-  /* Not removed via appearance */
-  margin: 0;
-
-  font: inherit;
-  color: currentColor;
-  width: 1.15em;
-  height: 1.15em;
-  border: 0.10em solid currentColor;
-  border-radius: 0.15em;
-  transform: translateY(-0.075em);
-
-  display: grid;
-  place-content: center;
+.piece:hover input ~ svg{
+	transform: scale(1.8, 1.8)	
+}
+.piece input:checked ~ svg{
+	opacity: 1;
 }
 
-input[type="checkbox"]::before {
-  content: "";
-  width: 0.65em;
-  height: 0.65em;
-  transform: scale(0);
-  transform-origin: center;
-  transition: 50ms transform ease-in-out;
-  box-shadow: inset 1em 1em var(--form-control-color);
-  /* Windows High Contrast Mode */
-  background-color: CanvasText;
-}
-
-input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-input[type="checkbox"]:disabled {
-  --form-control-color: var(--form-control-disabled);
-
-  color: var(--form-control-disabled);
-  cursor: not-allowed;
+.piece input:not(:checked) ~ svg{
+	opacity: 0.3;
 }
