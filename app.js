@@ -194,7 +194,7 @@ const newTile = () => {
     let found = false
     let moveList = []
     let destination = {}
-    if (!knight_option.chcked && !bishop_option.checked && !rook_option.checked){
+    if (!(knight_option.checked || bishop_option.checked || rook_option.checked)){
         do {
             destination = {
                 x: Math.floor(Math.random() * SQUARE_COLS),
@@ -202,6 +202,7 @@ const newTile = () => {
                 color: RED
             }
         } while (getTileHere(destination) !== undefined)
+        console.log("Random move")
         tiles.push(destination)
 
     } else {
