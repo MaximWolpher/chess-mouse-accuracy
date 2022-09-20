@@ -12,6 +12,9 @@ const RED = '#ed6767'
 const canvas = document.getElementById('game')
 const headerInfo = document.getElementById('header-info')
 const gameStats = document.getElementById('game-stats')
+const knight_option = document.getElementById("knight-option")
+const bishop_option = document.getElementById("bishop-option")
+const rook_option = document.getElementById("rook-option")
 const ctx = canvas.getContext('2d')
 
 let tiles = []
@@ -187,26 +190,54 @@ const newTile = () => {
         y: Math.floor(Math.random() * SQUARE_ROWS),
         color: YELLOW
     }
-    let piece = Math.floor(Math.random() * PIECES)
-    switch (piece){
-        case 0:
-            moveList = knightMove(tile)
-            console.log("Knight move")
-            break
-        case 1:
-            moveList = bishMove(tile)
-            console.log("Bishop move")
-            break
-        case 2:
-            moveList = rookMove(tile)
-            console.log("Rook move")
-            break
-    }
-    let index = Math.floor(Math.random() * moveList.length)
     tiles.push(tile)
-    let destination = moveList[index]
-    destination.color = RED
-    tiles.push(destination)
+    let found = false
+    let moveList = []
+    let destination = {}
+    if (!knight_option.chcked && !bishop_option.checked && !rook_option.checked){
+        do {
+            destination = {
+                x: Math.floor(Math.random() * SQUARE_COLS),
+                y: Math.floor(Math.random() * SQUARE_ROWS),
+                color: RED
+            }
+        } while (getTileHere(destination) !== undefined)
+        tiles.push(destination)
+
+    } else {
+        
+        while(!found){
+            let piece = Math.floor(Math.random() * PIECES)
+
+            switch (piece){
+                case 0:
+                    moveList = knightMove(tile)
+                    if (knight_option.checked){
+                        found = true
+                        console.log("Knight move")
+                    }
+                    break
+                case 1:
+                    moveList = bishMove(tile)
+                    if (bishop_option.checked){
+                        found = true
+                        console.log("Bishop move")
+                    }
+                    break
+                case 2:
+                    moveList = rookMove(tile)
+                    if (rook_option.checked){
+                        found = true
+                        console.log("Rook move")
+                    }
+                    break
+            }
+        }
+        let index = Math.floor(Math.random() * moveList.length)
+        destination = moveList[index]
+        destination.color = RED
+        tiles.push(destination)
+    }
 }
 
 
@@ -280,6 +311,12 @@ const startPage = () => {
     gameStats.innerHTML = textInfo
 
     ctx.clearRect(0, 0, canvas.width, canvas.height) 
+    ctx.font = "35px sans-serif"
+	ctx.fillStyle = "#99d9ea"
+	ctx.textAlign = "center"
+	ctx.fillText("Press any key to start", canvas.width/2, canvas.height/2)
+	ctx.font = "20px sans-serif"
+	ctx.fillText("Click on the yellow square and release on the red", canvas.width/2, 3*canvas.height/4)
     requestAnimationFrame(startPage)
 
 }
