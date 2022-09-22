@@ -123,6 +123,38 @@ canvas{
 input {
     display: none;
 }
+.button-container{
+	align-items: center;
+	justify-content: center;
+	display: flex;
+}
+.button {
+  background-color: #333538;
+  display: flex;
+  border: none;
+  padding: 10px 22px;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Red Hat Display', sans-serif !important;
+  font-size: 19px;
+  color: #99d9ea;
+  margin: 0 auto;
+  height: 50px;
+  width: 150px;
+}
+.button:hover {
+	font-size: 18px;
+}
+.stat-header{
+  color: #99d9ea;
+  display: flex;
+  font-family: 'Red Hat Display', sans-serif !important;
+  font-size: 19px;
+  text-align: center;
+  justify-content: center;
+  margin: 0 auto;
+  margin-top: 10px;
+}
 
 .piece:hover input ~ svg{
 	transform: scale(1.8, 1.8)	
@@ -134,10 +166,14 @@ input {
 .piece input:not(:checked) ~ svg{
 	opacity: 0.3;
 }
-.highcharts-figure{
-    width: 400px;
-    height: 300px;
+.gauge-highcharts-figure{
     margin: 0 auto;
+}
+.spider-highcharts-figure{
+    margin: 0 auto;
+}
+.highchart{
+    height: 280px;
 }
 .chart-container {
     width: 390px;
@@ -148,11 +184,4 @@ input {
     font-family: 'Red Hat Display', sans-serif !important;
 }
 
-@media (max-width: 400px) {
-    .highcharts-figure .chart-container {
-        width: 400px;
-        height: 300;
-        margin: 0 auto;
-    }
-}
 

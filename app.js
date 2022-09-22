@@ -16,10 +16,16 @@ const headerInfo = document.getElementById('header-info')
 const knight_option = document.getElementById("knight-option")
 const bishop_option = document.getElementById("bishop-option")
 const rook_option = document.getElementById("rook-option")
+const stats_button = document.getElementById("stats-button")
 const ctx = canvas.getContext('2d')
-const gaugeReduce = 0.01
 
 let gaugeStart = 80
+let interval = null
+let intervalReduce = 50
+let minIntSpeed = 300
+let gaugeIncrease = 3
+let initIntervalSpeed = 1000
+let intervalSpeed = 1000
 let isPaused = true
 let tiles = []
 let moveList = []
@@ -94,8 +100,7 @@ const gaugeOptions = {
         endAngle: 90,
         background: {
             borderColor: '#333538',
-            backgroundColor:
-                '#EEE',
+            backgroundColor:'#e7e6e6',
             innerRadius: '60%',
             outerRadius: '100%',
             shape: 'arc'
@@ -186,6 +191,7 @@ const chartSpider = Highcharts.chart('container-spider', {
     yAxis: {
         gridLineInterpolation: 'polygon',
         lineWidth: 0,
+        lineColor: '#e7e6e6',
         min: 0,
         //max: 1000,
         labels:{
@@ -209,23 +215,31 @@ const chartSpider = Highcharts.chart('container-spider', {
     }]
 });
 
-
 setInterval(function () {
-    let point,
-        newVal
-    if (!isPaused){
-        if (chartGauge) {
-            point = chartGauge.series[0].points[0];
-            newVal = point.y - 1;
-
-            if (newVal < 0 ) {
-                newVal = 0;
-            }
-
-            point.update(newVal);
-        }
+    intervalSpeed -= intervalReduce
+    if (intervalSpeed <= minIntSpeed){
+        intervalSpeed = minIntSpeed
     }
-}, 200);
+    clearInterval(interval)
+    interval = setInterval(function () {
+        let point,
+            newVal
+        if (!isPaused){
+            if (chartGauge) {
+                point = chartGauge.series[0].points[0];
+                newVal = point.y - 1;
+    
+                if (newVal < 0 ) {
+                    newVal = 0;
+                }
+    
+                point.update(newVal);
+            }
+        }
+    }, intervalSpeed);
+
+}, 5000);
+
 
 const delta = (startTime) => ((Date.now() - startTime) / 1000.0).toFixed(3)
 
@@ -356,8 +370,10 @@ const resetSession = () => {
         newVal = gaugeStart
     	point.update(newVal);
 	}
-	clearStats()
-	updateStats()
+	//clearStats()
+	//updateStats()
+	intervalSpeed = initIntervalSpeed
+	clearInterval(interval)
     startPage()
 }
 
@@ -378,6 +394,11 @@ const updateStats = () => {
 	}
 }
 
+const handleButton = event => {
+	clearStats()
+    updateStats()
+
+}
 const handleClick = event => {
     const tile = {
         x: Math.floor((event.clientX - canvas.offsetLeft + window.scrollX) / SQUARE_SIZE),
@@ -413,7 +434,7 @@ const handleRelease = event => {
         
     	if (chartGauge) {
     	    point = chartGauge.series[0].points[0];
-    	    newVal = point.y + 10;
+    	    newVal = point.y + gaugeIncrease;
 
     	    if (newVal > 100) {
     	        newVal = 100;
@@ -539,6 +560,15 @@ const initBoard = () => {
         ctx.fillStyle = tile.color
         ctx.fillRect(tile.x * SQUARE_SIZE, tile.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
     }
+    let point,
+        newVal
+    if (chartGauge) {
+        point = chartGauge.series[0].points[0]
+        newVal = gaugeStart
+    	point.update(newVal);
+	}
+	//clearStats()
+    updateStats()
     update()
 }
 
@@ -563,10 +593,23 @@ const startPage = () => {
 
 startPage()
 
+const checkGauge = () => {
+    let point
+    if (chartGauge) {
+        point = chartGauge.options.series[0].data[0];
+        if (point <= 0) {
+            resetSession()
+        }
+    }
+}
+
+setInterval(checkGauge, 200)
 window.onload = () => {
 
     document.addEventListener('keydown', initBoard)
     canvas.addEventListener('mousedown', handleClick)
     canvas.addEventListener('mouseup', handleRelease)
+    stats_button.addEventListener('click', handleButton)
 
 }
+
