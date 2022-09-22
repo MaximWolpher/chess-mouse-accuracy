@@ -55,13 +55,7 @@ body {
 	flex-flow: column;
 }
 
-.game-stats{
-	text-align: center;
-    font-family: 'Red Hat Display', sans-serif !important;
-    font-size: 25px;
-    color: #99d9ea;
-	padding: 1em;
-}
+
 .game-options{
     font-family: 'Red Hat Display', sans-serif !important;
     font-size: 25px;
@@ -116,12 +110,12 @@ canvas{
   position: relative;
   cursor: pointer;
   border: 3px solid #99d9ea;
-  border-radius: 5px;
+  border-radius: var(--borderRadius);
   box-sizing: border-box;
   margin: 1em;
 }
 
-svg{
+.piece svg{
 	transform: scale(2, 2);
 }
 
@@ -140,3 +134,25 @@ input {
 .piece input:not(:checked) ~ svg{
 	opacity: 0.3;
 }
+.highcharts-figure{
+    width: 400px;
+    height: 300px;
+    margin: 0 auto;
+}
+.chart-container {
+    width: 390px;
+    height: 250px;
+    margin: 0 auto;
+}
+.highcharts-container svg{
+    font-family: 'Red Hat Display', sans-serif !important;
+}
+
+@media (max-width: 400px) {
+    .highcharts-figure .chart-container {
+        width: 400px;
+        height: 300;
+        margin: 0 auto;
+    }
+}
+

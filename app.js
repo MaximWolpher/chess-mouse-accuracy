@@ -9,18 +9,225 @@ const WHITE = '#e7e6e6'
 const BLACK = '#7196b2'
 const YELLOW = '#d9a95e'
 const RED = '#ed6767'
+const GREEN = '#a7e05e'
+const GRAY = '#333538'
 const canvas = document.getElementById('game')
 const headerInfo = document.getElementById('header-info')
-const gameStats = document.getElementById('game-stats')
 const knight_option = document.getElementById("knight-option")
 const bishop_option = document.getElementById("bishop-option")
 const rook_option = document.getElementById("rook-option")
 const ctx = canvas.getContext('2d')
+const gaugeReduce = 0.01
 
+let gaugeStart = 80
+let isPaused = true
 let tiles = []
 let moveList = []
 let points = 0
 let best = JSON.parse(localStorage.getItem('best-pts') ?? '{"points":0}')
+let overallStartTime = Date.now()
+let moveStartTime = null
+let currentPiece = null
+let pieceMap = ['knight', 'bishop', 'rook', 'random']
+let spiderMap = ['overall', 'knight', 'random', 'rook', 'bishop']
+let moveStats = {
+    'knight': {
+        'hit': 0,
+        'miss': 0,
+        'totalTime': 0
+    },
+    'bishop': {
+        'hit': 0,
+        'miss': 0,
+        'totalTime': 0
+    },
+    'rook': {
+        'hit': 0,
+        'miss': 0,
+        'totalTime': 0
+    },
+    'random': {
+        'hit': 0,
+        'miss': 0,
+        'totalTime': 0
+    },
+    'overall': {
+        'hit': 0,
+        'miss': 0,
+        'totalTime': 0
+    },
+}
+
+const clearStats = () => {
+    for (let statType in moveStats) {
+        for (let keyName in moveStats[statType]) {
+            moveStats[statType][keyName] = 0
+        }
+    }
+    let statType,
+        point,
+        newVal
+    if (chartSpider) {
+        for (let pieceIndex in spiderMap) {
+            statType = spiderMap[pieceIndex]
+            point = chartSpider.series[0].data[pieceIndex]
+	    	newVal = 200
+    	    point.update(newVal)
+
+	    }
+	}
+    
+}
+
+const gaugeOptions = {
+    chart: {
+        type: 'solidgauge',
+        backgroundColor: '#333538'
+    },
+
+    title: null,
+
+    pane: {
+        center: ['50%', '70%'],
+        size: '120%',
+        startAngle: -90,
+        endAngle: 90,
+        background: {
+            borderColor: '#333538',
+            backgroundColor:
+                '#EEE',
+            innerRadius: '60%',
+            outerRadius: '100%',
+            shape: 'arc'
+        }
+    },
+    exporting: {
+ 		enabled: false
+ 	},
+
+	tooltip: {
+ 		enabled: false
+ 	},
+
+    yAxis: {
+        visible: false,
+        stops: [
+            [0.1, RED], 
+            [0.5, YELLOW], 
+            [0.9, GREEN] 
+        ],
+        lineWidth: 0,
+        tickWidth: 0,
+
+        tickAmount: 0,
+        labels: {
+            y: 16
+        }
+    },
+
+    plotOptions: {
+        solidgauge: {
+            dataLabels: {
+                y: 5,
+                borderWidth: 0,
+                useHTML: true
+            }
+        }
+    }
+};
+
+const chartGauge = Highcharts.chart('container-gauge', Highcharts.merge(gaugeOptions, {
+    yAxis: {
+        min: 0,
+        max: 100
+
+    },
+
+    credits: {
+        enabled: false
+    },
+
+    series: [{
+        name: 'Energy',
+        data: [80],
+        dataLabels: {
+            format:
+                '<div style="text-align:center; margin-bottom: 50px; color:#99d9ea; font-family: \'Red Hat Display\', sans-serif;">' +
+                '<span style="font-size:25px">{y}</span><br/>' +    
+                '</div>'
+        }
+    }]
+
+}));
+
+const chartSpider = Highcharts.chart('container-spider', {
+    chart: {
+        polar: true,
+        type: 'line',
+        backgroundColor: '#333538'
+    },
+
+    pane: {
+        size: '120%'
+    },
+    credits: {
+        enabled: false
+    },
+    xAxis: {
+        categories: ['Overall', 'Knight', 'Random', 'Rook', 'Bishop'],
+        tickmarkPlacement: 'on',
+        lineWidth: 0,
+        labels:{
+            style: {
+                color: '#99d9ea'
+            }
+        }
+    },
+    yAxis: {
+        gridLineInterpolation: 'polygon',
+        lineWidth: 0,
+        min: 0,
+        //max: 1000,
+        labels:{
+        	enabled: false
+        }
+    },
+    legend: {
+        enabled: false
+    },
+
+    series: [{
+        name: 'Avg speed (ms)',
+        data: [200, 200, 200, 200, 200],
+        pointPlacement: 'on',
+		color: '#99d9ea',
+    },{
+        name: 'Speed goal (ms)',
+        data: [200, 200, 200, 200, 200],
+        pointPlacement: 'on',
+		color: RED,
+    }]
+});
+
+
+setInterval(function () {
+    let point,
+        newVal
+    if (!isPaused){
+        if (chartGauge) {
+            point = chartGauge.series[0].points[0];
+            newVal = point.y - 1;
+
+            if (newVal < 0 ) {
+                newVal = 0;
+            }
+
+            point.update(newVal);
+        }
+    }
+}, 200);
+
+const delta = (startTime) => ((Date.now() - startTime) / 1000.0).toFixed(3)
 
 const rookMove = (from) => {
     moveList = []
@@ -135,17 +342,42 @@ const queenMove = (from) => {
     return moveList
 }
 
-
-
-
 const resetSession = () => {
+    isPaused = true
     if (points === best.points) {
         localStorage.setItem('best-pts', JSON.stringify(best))
     }
+    let point,
+        newVal
     points = 0
     canvas.style.pointerEvents = "none"
+    if (chartGauge) {
+        point = chartGauge.series[0].points[0]
+        newVal = gaugeStart
+    	point.update(newVal);
+	}
+	clearStats()
+	updateStats()
     startPage()
 }
+
+const updateStats = () => {
+    let statType,
+        point,
+        newVal
+    if (chartSpider) {
+        for (let pieceIndex in spiderMap) {
+            statType = spiderMap[pieceIndex]
+            point = chartSpider.series[0].data[pieceIndex]
+	    	if (moveStats[statType]['hit'] > 0){
+	    	    newVal = Math.round(1000 * (moveStats[statType]['totalTime'] / (moveStats[statType]['hit'])))
+    	        point.update(newVal);
+            }
+
+	    }
+	}
+}
+
 const handleClick = event => {
     const tile = {
         x: Math.floor((event.clientX - canvas.offsetLeft + window.scrollX) / SQUARE_SIZE),
@@ -156,7 +388,9 @@ const handleClick = event => {
     if (here !== undefined && getTileColor(here) == YELLOW) {
         removeTileHere(here)
         update()
+        moveStartTime = Date.now()
     } else {
+        moveStats['overall']['miss']++
         resetSession()
     }
 }
@@ -167,18 +401,36 @@ const handleRelease = event => {
         y: Math.floor((event.clientY - canvas.offsetTop + window.scrollY) / SQUARE_SIZE)
     }
 
+    let moveTime = delta(moveStartTime)
+    let point,
+        newVal
     const here = getTileHere(tile)
     if (here !== undefined && getTileColor(here) == RED && tiles.length == 1) {
+        moveStats['overall']['hit']++
+        moveStats['overall']['totalTime'] += parseFloat(moveTime)
+        moveStats[pieceMap[currentPiece]]['hit']++
+        moveStats[pieceMap[currentPiece]]['totalTime'] += parseFloat(moveTime)
+        
+    	if (chartGauge) {
+    	    point = chartGauge.series[0].points[0];
+    	    newVal = point.y + 10;
+
+    	    if (newVal > 100) {
+    	        newVal = 100;
+    	    }
+
+        	point.update(newVal);
+		}
         newTile()
-
         removeTileHere(here)
-        points++
-
-        if (points > best.points) {
-            best.points = points
-        }
         update()
+        updateStats() 
+
     } else {
+        moveStats['overall']['miss']++
+        moveStats['overall']['totalTime'] += parseFloat(moveTime)
+        moveStats[pieceMap[currentPiece]]['miss']++
+        moveStats[pieceMap[currentPiece]]['totalTime'] += parseFloat(moveTime)
         resetSession()
     }
     
@@ -192,6 +444,7 @@ const newTile = () => {
     }
     tiles.push(tile)
     let found = false
+    let piece = null
     let moveList = []
     let destination = {}
     if (!(knight_option.checked || bishop_option.checked || rook_option.checked)){
@@ -202,34 +455,34 @@ const newTile = () => {
                 color: RED
             }
         } while (getTileHere(destination) !== undefined)
-        console.log("Random move")
         tiles.push(destination)
+        currentPiece = 3
 
     } else {
         
         while(!found){
-            let piece = Math.floor(Math.random() * PIECES)
+            piece = Math.floor(Math.random() * PIECES)
 
             switch (piece){
                 case 0:
                     moveList = knightMove(tile)
                     if (knight_option.checked){
                         found = true
-                        console.log("Knight move")
+                        currentPiece = piece
                     }
                     break
                 case 1:
                     moveList = bishMove(tile)
                     if (bishop_option.checked){
                         found = true
-                        console.log("Bishop move")
+                        currentPiece = piece
                     }
                     break
                 case 2:
                     moveList = rookMove(tile)
                     if (rook_option.checked){
                         found = true
-                        console.log("Rook move")
+                        currentPiece = piece
                     }
                     break
             }
@@ -265,9 +518,10 @@ const resetBoard = () => {
 }
 
 const initBoard = () => {
-    points = 0
+    overallStartTime = Date.now()
     canvas.style.pointerEvents = "auto"
     tiles = []
+    isPaused = false
     for (let i = 0; i < SQUARE_INIT; i++) {
         newTile()
     }
@@ -289,28 +543,11 @@ const initBoard = () => {
 }
 
 const update = () => {
-    let textInfo = `Score: ${points}<br>`
-    if (points === best.points) {
-        textInfo += `Best Score:${best.points}`
-    } else {
-        textInfo += `Best Score: ${best.points}`
-    }
-    gameStats.innerHTML = textInfo
     resetBoard()
     requestAnimationFrame(update)
 }
 
 const startPage = () => {
-    const startText= `Chess Mouse Accuracy Trainer`
-    headerInfo.innerHTML = startText 
-    let textInfo = `Score: ${points}<br>`
-    if (points === best.points) {
-        textInfo += `Best Score:${best.points}`
-    } else {
-        textInfo += `Best Score: ${best.points}`
-    }
-    gameStats.innerHTML = textInfo
-
     ctx.clearRect(0, 0, canvas.width, canvas.height) 
     ctx.font = "35px sans-serif"
 	ctx.fillStyle = "#99d9ea"
@@ -318,13 +555,15 @@ const startPage = () => {
 	ctx.fillText("Press any key to start", canvas.width/2, canvas.height/2)
 	ctx.font = "20px sans-serif"
 	ctx.fillText("Click on the yellow square and release on the red", canvas.width/2, 3*canvas.height/4)
+	ctx.fillStyle = RED
+	ctx.fillText("Don't let the gauge run out!", canvas.width/2, 3.5*canvas.height/4)
     requestAnimationFrame(startPage)
 
 }
 
+startPage()
 
 window.onload = () => {
-    startPage()
 
     document.addEventListener('keydown', initBoard)
     canvas.addEventListener('mousedown', handleClick)

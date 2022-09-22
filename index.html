@@ -4,12 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/highcharts-more.js"></script>
+	<script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+	<script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <title>Chess Mouse Accuracy</title>
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 </head>
 <body>
     <div class="header">
-        <p id="header-info"></p>
+        <p id="header-info">Chess Mouse Accuracy Trainer</p>
     </div>
     <div id="main-wrap">
 		<main class="lobby">
@@ -89,7 +93,16 @@
                 <canvas class "chess" id="game" width="680" height="680"></canvas>
             </div>
             <div class="container-right">
-                <p id="game-stats" class="game-stats"></p>
+                <div id="gaugeChart" class="highchart">
+	            	<figure class="highcharts-figure">
+	            	    <div id="container-gauge" class="chart-container"></div>
+	            	</figure>
+	            </div>
+                <div id="spiderChart" class="highchart">
+	            	<figure class="highcharts-figure">
+	            	    <div id="container-spider" class="chart-container"></div>
+	            	</figure>
+	            </div>
             </div>
         </div>
 		</main>
